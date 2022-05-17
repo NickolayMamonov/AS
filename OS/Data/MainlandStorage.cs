@@ -10,8 +10,8 @@ public class MainlandStorage : IMainlandStorage
     {
         _mainlands = new List<Mainland>()
         {
-            new Mainland("Австралия", new List<int>(){1, 2, 3}),
-            new Mainland("Азия", new List<int>(){4})
+            new Mainland("Евразия", new List<int>(){1, 2, 3}),
+            new Mainland("Северная Америка", new List<int>(){4})
         };
     }
 

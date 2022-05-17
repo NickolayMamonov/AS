@@ -11,10 +11,10 @@ public class CountryStorage : ICountryStorage
         _mainlandStorage = mainlandStorage;
         _countries = new List<Country>()
         {
-            new Country("Австралийский чеглок", "Хищная птица"),
-            new Country("Австралийский ложный вампир", "Рукокрылые"),
-            new Country("Австралийский бычерыл", "Хрящевая рыба"),
-            new Country("Азиатский кеклик", "Птица")
+            new Country("Россия", "17.125.191"),
+            new Country("Германия", "357.578"),
+            new Country("Франция", "643.801"),
+            new Country("США", "9.826.675")
         };
     }
 
