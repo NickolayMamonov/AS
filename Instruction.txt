@@ -1,0 +1,226 @@
+1)Для установки .net core 6.0
+wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
+
+2)Установка пакета SDK
+sudo apt-get update; \
+  sudo apt-get install -y apt-transport-https && \
+  sudo apt-get update && \
+  sudo apt-get install -y dotnet-sdk-6.0
+
+3)Установка среды выполнения ASP.NET Core
+sudo apt-get update; \
+  sudo apt-get install -y apt-transport-https && \
+  sudo apt-get update && \
+  sudo apt-get install -y aspnetcore-runtime-6.0 
+
+(sudo apt-get install -y dotnet-runtime-6.0 для dotnet)
+
+4)Установить git командой
+sudo apt-get install git
+
+5)Создаем директорию под проект
+sudo mkdir app
+(проверяем ls)
+
+6)Переходим в неё 
+cd app
+
+7)Клонировать проект с репозитория
+sudo git init
+
+8)sudo git clone https://github.com/NickolayMamonov/AS - клонируем реп
+
+9) Переходим в папку заклоненного или хуй знает как правильно говорить, проекта
+
+10)sudo dotnet build -c Release
+
+11)sudo dotnet publish -c Release - пробный релиз
+
+12)sudo dotnet publish -c Release -o /var/www/app - релиз в папку для деплоя
+
+13)sudo chown student /var/www/app - устанавливаем права на доступ к папке
+
+14)sudo apt-get install nginx - устанавливаем nginx
+
+15)sudo nano /etc/nginx/nginx.conf
+меняем имя юзера на "student" или какое у вас там
+
+16)sudo nano /etc/nginx/sites-availiable/default и стираем все содержимое, которое не закомичено( т.е. светиться белым, зеленое не трогать)
+ и вместо него вставляем:
+
+server {
+    listen        80;
+    server_name   student; - СВОЕ ИМЯ СЕРВЕРА 
+    location / {
+        proxy_pass         http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection keep-alive;
+        proxy_set_header   Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+}
+
+17)sudo nginx -t  - проверяем нет ли ошибок, если есть - ИСПРАВЛЯЕМ и заново
+
+18)sudo nginx -s reload
+
+19)sudo systemctl restart nginx.service
+
+20)sudo systemctl status nginx -если все ОК, идем дальше, или на пересдачу
+
+21)Для настройки демона systemd: cd /etc/systemd/system
+
+22)sudo nano kestrel-app.service 
+вносим в него: 
+[Unit]
+Description=Example .NET Web API App running on Ubuntu
+[Service]
+WorkingDirectory=/var/www/app -ПУТЬ К ДИРЕКТОРИИ, ГДЕ ЛЕЖИТ ПРОЕКТ
+ExecStart=/usr/bin/dotnet /var/www/app/AS.dll -ПУТЬ К ДИРЕКТОРИИ, ГДЕ ЛЕЖИТ ПРОЕКТ, И НАЗВАНИЕ ПРОЕКТА
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=kestrel-app - НАЗВАНИЕ СЛУЖБЫ, создавали в пункте 22.
+User=student - СВОЕ ИМЯ ПОЛЬЗОВАТЕЛЯ
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+[Install]
+WantedBy=multi-user.target
+
+выходим, не забывая  сохранить!
+
+23)Включаем службу: sudo systemctl enable kestrel-app.service
+
+24)Запустите службу: sudo systemctl start kestrel-app.service
+
+25)Проверяем, что служба успешно запущена: systemctl status kestrel-app.service
+
+Если запустилась идем в браузер, на винде, в поисковой строке IP адрес своего сервера, 
+из ifconfig, тот по которому конектимся к putty и route вашего контроллера
+Пример:
+http://192.168.1.84/api/countries (запросы делаем по http).
+
+
+
+(ИНСТРУКЦИЯ ДЛЯ ПРО ЧЕЛОВ)
+Подключаемся к удаленному репозиторию:
+sudo git clone https://github.com/AnatolyPanushkin/AdministrationWebApplication.git
+
+//Скачиваем проект командой:
+sudo git pull https://github.com/maksimkayun/AnimalsAndAreals.git master
+	7.1)
+	если что-то не так, то переходим в Home командой cd и удаляем нахуй папку с проектом командой sudo rm -rf app, 
+	возвращаемся в п.5
+//
+
+8)Собрать проект командой:
+sudo dotnet build -c Release
+
+9)Делаем пробный релиз
+sudo dotnet publish -c Release
+
+10) Работает? Тогда Ctrl + Z, иначе см. пункт 7.1)
+И Релиз в папку для прода
+sudo dotnet publish -c Release /var/www/app
+sudo chown anatoly /var/www/app
+
+
+11) sudo apt-get install nginx (устанавливаем nginx)
+
+12)sudo nano /etc/nginx/nginx.conf
+меняем имя юзера
+
+12.5) sudo nano /etc/nginx/sites-availiable/default меняем на то что в п.16
+чекаем 
+
+13) Готовим папку для релиза
+cd /var/www
+sudo mkdir OS
+Меняем права
+sudo chown username OS (проверяем ls -all)
+
+14) Публикация
+Переходим в папку с проектом
+cd
+cd OS
+cd OS
+dotnet publish -c Release -o /var/www/OS
+
+15) Для настройки демона systemd
+cd /etc/systemd/system
+sudo touch kestrel-OS.service
+sudo nano kestrel-OS.service
+вносим в него 
+[Unit]
+Description=Example .NET Web API App running on Ubuntu
+[Service]
+WorkingDirectory=/var/www/app
+ExecStart=/usr/bin/dotnet /var/www/app/AdministrationWebApplication.dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=kestrel-app
+User=anatoly
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+[Install]
+WantedBy=multi-user.target
+
+Сохраняем и включаем службу
+
+16)Включаем службу
+
+sudo systemctl enable kestrel-OS.service
+
+Запустите службу и убедитесь, что она работает
+sudo systemctl start kestrel-OS.service
+
+Проверяем systemctl status kestrel-OS.service
+
+sudo systemctl daemon-reload
+sudo systemctl start kestrel-OS
+
+ПОСЛЕ ЗАПУСКА СЛУЖБЫ ИДЕМ В БРАУЗЕР И ПРОВЕРЯЕМ
+
+Чтобы настроить Nginx как обратный прокси-сервер для перенаправления HTTP-запросов в ваше приложение ASP.NET Core, 
+измените файл /etc/nginx/sites-available/default. 
+Откройте этот файл в текстовом редакторе и замените его содержимое на следующий фрагмент кода:
+server {
+    listen        80;
+    server_name   anatoly;
+    location / {
+        proxy_pass         http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection keep-alive;
+        proxy_set_header   Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+}
+// для справки
+sudo apt-get install ufw
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+sudo ln -s /etc/nginx/sites-available/aspnetcore.conf /etc/nginx/sites-enabled/aspnetcore.conf
+sudo ufw allow 'Nginx Full'
+sudo ufw delete allow 'Nginx HTTP'
+
+!!! ИМЯ ЮЗЕРА - см в папке /etc/nginx/nginx.conf
+
+после его изменений обязательно нужно выполнить команды
+sudo nginx -t
+// проверяем нет ли ошибок, если есть - ИСПРАВЛЯЕМ и заново
+sudo nginx -s reload
+sudo systemctl restart nginx.service
+ 
